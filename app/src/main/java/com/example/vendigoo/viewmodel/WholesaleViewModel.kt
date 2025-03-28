@@ -1,0 +1,70 @@
+package com.example.vendigoo.viewmodel
+
+import android.app.Application
+import android.content.Context
+import android.net.Uri
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.vendigoo.data.entities.District
+import com.example.vendigoo.data.entities.InitialBalance
+import com.example.vendigoo.data.entities.Supplier
+import com.example.vendigoo.data.entities.Transaction
+import com.example.vendigoo.data.entities.database.WholesaleDatabase
+import com.example.vendigoo.repository.WholesaleRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
+
+// viewmodel/WholesaleViewModel.kt
+class WholesaleViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository: WholesaleRepository
+
+    init {
+        val dao = WholesaleDatabase.getDatabase(application).wholesaleDao()
+        repository = WholesaleRepository(dao)
+    }
+
+    // Rayonlar
+    val districts = repository.getAllDistricts().flowOn(Dispatchers.IO)
+    fun addDistrict(name: String) = viewModelScope.launch { repository.addDistrict(name) }
+    fun deleteDistrict(district: District) = viewModelScope.launch { repository.deleteDistrict(district) }
+
+    // Təchizatçılar
+    fun getSuppliers(districtId: Int) = repository.getSuppliers(districtId)
+    fun addSupplier(districtId: Int, name: String, phone: String) = viewModelScope.launch {
+        repository.addSupplier(districtId, name, phone)
+    }
+    fun deleteSupplier(supplier: Supplier) = viewModelScope.launch { repository.deleteSupplier(supplier) }
+
+    // İlkin qalıq
+    fun getInitialBalances(supplierId: Int) = repository.getInitialBalances(supplierId)
+    fun addInitialBalance(supplierId: Int, amount: Double) = viewModelScope.launch {
+        repository.addInitialBalance(supplierId, amount)
+    }
+    fun deleteInitialBalance(balance: InitialBalance) = viewModelScope.launch {
+        repository.deleteInitialBalance(balance)
+    }
+
+    // Əməliyyatlar
+    fun getTransactions(supplierId: Int, type: String) = repository.getTransactions(supplierId, type)
+    fun addTransaction(supplierId: Int, amount: Double, type: String) = viewModelScope.launch {
+        repository.addTransaction(supplierId, amount, type)
+    }
+    fun deleteTransaction(transaction: Transaction) = viewModelScope.launch {
+        repository.deleteTransaction(transaction)
+    }
+
+    // Yedəkləmə və Bərpa
+    fun createBackupAndShare(context: Context) = viewModelScope.launch {
+        val data = repository.getBackupData()
+        val file = repository.createBackupFile(context, data)
+        repository.shareBackupViaWhatsApp(context, file)
+    }
+
+    fun restoreFromFile(context: Context, uri: Uri) = viewModelScope.launch {
+        val backupData = repository.parseBackupFile(context, uri)
+        if (backupData != null) {
+            repository.restoreToDatabase(backupData)
+        }
+    }
+}
