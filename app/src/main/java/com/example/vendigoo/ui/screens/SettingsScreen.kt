@@ -21,11 +21,13 @@ fun SettingsScreen(
     viewModel: WholesaleViewModel
 ) {
     val context = LocalContext.current
+
+    // Fayl seçmək üçün launcher
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri: Uri? ->
             uri?.let {
-                viewModel.restoreFromFile(context, it)
+                viewModel.restoreBackupFile(context, it)
             }
         }
     )
@@ -42,14 +44,28 @@ fun SettingsScreen(
             )
         }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding).padding(16.dp)) {
-            Button(onClick = { viewModel.createBackupAndShare(context) }) {
-                Text("📤 Yedəklə və WhatsApp-la Göndər")
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .padding(16.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Button(
+                onClick = {
+                    viewModel.backupDataToDownloads(context)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("📤 Yedəklə (Downloads-a)")
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(onClick = { filePickerLauncher.launch("text/plain") }) {
+            Button(
+                onClick = {
+                    filePickerLauncher.launch("text/plain")
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text("📥 Fayldan Bərpa Et")
             }
         }

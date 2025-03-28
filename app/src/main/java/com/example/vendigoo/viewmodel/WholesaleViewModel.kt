@@ -3,6 +3,7 @@ package com.example.vendigoo.viewmodel
 import android.app.Application
 import android.content.Context
 import android.net.Uri
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vendigoo.data.entities.District
@@ -15,7 +16,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
-// viewmodel/WholesaleViewModel.kt
 class WholesaleViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: WholesaleRepository
 
@@ -54,17 +54,25 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
         repository.deleteTransaction(transaction)
     }
 
-    // Yedəkləmə və Bərpa
-    fun createBackupAndShare(context: Context) = viewModelScope.launch {
-        val data = repository.getBackupData()
-        val file = repository.createBackupFile(context, data)
-        repository.shareBackupViaWhatsApp(context, file)
+    fun backupDataToDownloads(context: Context) = viewModelScope.launch {
+        try {
+            val data = repository.getBackupData()
+            val file = repository.createBackupFileInDownloads(context, data)
+            Toast.makeText(context, "Yedəkləndi: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            Toast.makeText(context, "Yedəkləmə zamanı xəta baş verdi!", Toast.LENGTH_LONG).show()
+            e.printStackTrace()
+        }
     }
 
-    fun restoreFromFile(context: Context, uri: Uri) = viewModelScope.launch {
+    fun restoreBackupFile(context: Context, uri: Uri) = viewModelScope.launch {
         val backupData = repository.parseBackupFile(context, uri)
         if (backupData != null) {
             repository.restoreToDatabase(backupData)
+            Toast.makeText(context, "Bərpa edildi!", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(context, "Fayl uyğun deyil və ya zədəlidir!", Toast.LENGTH_LONG).show()
         }
     }
+
 }
