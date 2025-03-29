@@ -2,6 +2,7 @@ package com.example.vendigoo.viewmodel
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
@@ -58,12 +59,23 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
         try {
             val data = repository.getBackupData()
             val file = repository.createBackupFileInDownloads(context, data)
-            Toast.makeText(context, "Yedəkləndi: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+
+            Toast.makeText(context, "Yedəkləndi: ${file.name}", Toast.LENGTH_LONG).show()
+
+            // 👉 Qovluğu aç
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(Uri.fromFile(file.parentFile), "*/*")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+
+            context.startActivity(intent)
+
         } catch (e: Exception) {
-            Toast.makeText(context, "Yedəkləmə zamanı xəta baş verdi!", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Qovluğu aç Butonuna Kilik edin!", Toast.LENGTH_LONG).show()
             e.printStackTrace()
         }
     }
+
 
     fun restoreBackupFile(context: Context, uri: Uri) = viewModelScope.launch {
         val backupData = repository.parseBackupFile(context, uri)

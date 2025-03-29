@@ -1,8 +1,11 @@
 package com.example.vendigoo.ui.screens
 
+import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -14,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.vendigoo.viewmodel.WholesaleViewModel
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -21,8 +25,6 @@ fun SettingsScreen(
     viewModel: WholesaleViewModel
 ) {
     val context = LocalContext.current
-
-    // Fayl seçmək üçün launcher
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri: Uri? ->
@@ -47,26 +49,28 @@ fun SettingsScreen(
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(16.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Button(
-                onClick = {
-                    viewModel.backupDataToDownloads(context)
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("📤 Yedəklə (Downloads-a)")
+            Button(onClick = { viewModel.backupDataToDownloads(context) }) {
+                Text("📤 Yedəklə (Downloads)")
             }
 
-            Button(
-                onClick = {
-                    filePickerLauncher.launch("text/plain")
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            Button(onClick = { filePickerLauncher.launch("text/plain") }) {
                 Text("📥 Fayldan Bərpa Et")
+            }
+
+            // 📁 Qovluğu aç düyməsi
+            Button(onClick = {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.setDataAndType(
+                    android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                    "*/*"
+                )
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
+            }) {
+                Text("📁 Qovluğu Aç (Downloads)")
             }
         }
     }

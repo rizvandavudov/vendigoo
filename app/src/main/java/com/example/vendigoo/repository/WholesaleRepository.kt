@@ -50,12 +50,12 @@ class WholesaleRepository(private val dao: WholesaleDao) {
 
     // Faylı Downloads qovluğuna JSON formatında yaz
     fun createBackupFileInDownloads(context: Context, data: BackupData): File {
-        val json = Gson().toJson(data)
+        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        if (!downloadsDir.exists()) downloadsDir.mkdirs()
 
-        val downloadsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
         val file = File(downloadsDir, "backup_vendigoo.txt")
+        val json = Gson().toJson(data)
         file.writeText(json)
-
         return file
     }
 
