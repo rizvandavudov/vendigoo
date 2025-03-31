@@ -1,8 +1,11 @@
 package com.example.vendigoo
 
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
@@ -16,6 +19,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 // MainActivity.kt
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -39,9 +43,12 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val viewModel: WholesaleViewModel = viewModel()
 
+                val sharedPrefs = getSharedPreferences("vendigoo_prefs", Context.MODE_PRIVATE)
+
                 NavGraph(
                     navController = navController,
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    sharedPreferences = sharedPrefs
                 )
             }
         }
