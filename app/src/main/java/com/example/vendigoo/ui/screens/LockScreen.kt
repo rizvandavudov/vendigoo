@@ -3,15 +3,23 @@ package com.example.vendigoo.ui.components
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.vendigoo.R
 
 @Composable
 fun LockScreen(
@@ -19,7 +27,7 @@ fun LockScreen(
     sharedPreferences: SharedPreferences
 ) {
     val context = LocalContext.current
-    val correctCode = "12345" // Giriş kodunuzu buraya yazın
+    val correctCode = "12345"
     var inputCode by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var showDeveloperInfo by remember { mutableStateOf(false) }
@@ -33,7 +41,9 @@ fun LockScreen(
         }
     }
 
-    Scaffold { padding ->
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.surface
+    ) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -42,10 +52,25 @@ fun LockScreen(
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = "App Logo",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .padding(bottom = 8.dp)
+                        .clip(CircleShape)
+                )
+
+
+
+                Spacer(modifier = Modifier.height(24.dp))
+
                 Text(
                     text = "Tətbiqə giriş üçün kod daxil edin",
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.headlineSmall,
+                            fontSize = 20.sp,
                 )
+
                 Spacer(modifier = Modifier.height(24.dp))
 
                 OutlinedTextField(
@@ -86,7 +111,10 @@ fun LockScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 12.dp)
+                            .padding(horizontal = 12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text("📱 Tətbiq: VendiGoo")
