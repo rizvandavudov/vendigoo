@@ -1,4 +1,4 @@
-package com.example.vendigoo.ui.components
+package com.example.vendigoo.ui.screens
 
 import android.content.Intent
 import android.content.SharedPreferences
@@ -12,14 +12,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.vendigoo.R
+import androidx.compose.ui.graphics.Color
+
 
 @Composable
 fun LockScreen(
@@ -31,6 +31,8 @@ fun LockScreen(
     var inputCode by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var showDeveloperInfo by remember { mutableStateOf(false) }
+    val primaryButtonColor = Color(0xFFF4B740) // Logo rəngi ilə uyğun narıncı
+    val DevlButtonColor = Color(0xFFFFDC97) //  narıncı
 
     val isActivated = sharedPreferences.getBoolean("is_activated", false)
     LaunchedEffect(Unit) {
@@ -53,11 +55,10 @@ fun LockScreen(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "App Logo",
+                    painter = painterResource(id = R.drawable.vendigoo_logo),
+                    contentDescription = "VendiGoo Logo",
                     modifier = Modifier
-                        .size(80.dp)
-                        .padding(bottom = 8.dp)
+                        .size(150.dp)
                         .clip(CircleShape)
                 )
 
@@ -90,8 +91,12 @@ fun LockScreen(
                         }
                     } else {
                         errorMessage = "Kod yanlışdır!"
-                    }
-                }) {
+                    } },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = primaryButtonColor,
+                        contentColor = Color.Black
+                    )
+                ) {
                     Text("Daxil ol")
                 }
 
@@ -113,10 +118,11 @@ fun LockScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 12.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            containerColor = DevlButtonColor
                         )
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
+
                             Text("📱 Tətbiq: VendiGoo")
                             Text("👨‍💻 Developer: Rizvan Davudov")
                             Spacer(modifier = Modifier.height(8.dp))
@@ -129,6 +135,7 @@ fun LockScreen(
                                     context.startActivity(intent)
                                 },
                                 color = MaterialTheme.colorScheme.primary
+
                             )
                         }
                     }

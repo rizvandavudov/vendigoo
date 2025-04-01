@@ -12,7 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.vendigoo.ui.components.AboutScreen
-import com.example.vendigoo.ui.components.LockScreen
+import com.example.vendigoo.ui.screens.LockScreen
 import com.example.vendigoo.ui.screens.FinanceScreen
 import com.example.vendigoo.ui.screens.GivenGoodsScreen
 

@@ -72,6 +72,7 @@ fun MainScreen(
                 onClick = { showAddDialog = true },
                 modifier = Modifier.padding(bottom = 30.dp) // 30 dp yuxarı qaldırır
             ) {
+
                 Icon(Icons.Default.Add, contentDescription = "Yeni rayon")
             }
         }
