@@ -46,7 +46,7 @@ fun SupportScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("📧 E-poçt: support@vendigoo.com")
+            Text("📧 E-poçt: rizvan.davudov@yahoo.com")
 
             Text(
                 text = "📞 Telefon: +994 070 611 48 81",

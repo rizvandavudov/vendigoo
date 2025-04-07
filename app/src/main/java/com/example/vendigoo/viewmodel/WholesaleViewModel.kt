@@ -60,21 +60,28 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
             val data = repository.getBackupData()
             val file = repository.createBackupFileInDownloads(context, data)
 
-            Toast.makeText(context, "Yedəkləndi: ${file.name}", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Yedəkləndi: ${file.absolutePath}", Toast.LENGTH_LONG).show()
 
-            // 👉 Qovluğu aç
+            // 👉 FileProvider ilə təhlükəsiz aç
+            val uri = androidx.core.content.FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider",
+                file
+            )
+
             val intent = Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(Uri.fromFile(file.parentFile), "*/*")
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                setDataAndType(uri, "text/plain")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
 
-            context.startActivity(intent)
+            context.startActivity(Intent.createChooser(intent, "Faylı aç"))
 
         } catch (e: Exception) {
-            Toast.makeText(context, "Qovluğu aç Butonuna Kilik edin!", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Yedəkləmə və ya açma zamanı xəta baş verdi!", Toast.LENGTH_LONG).show()
             e.printStackTrace()
         }
     }
+
 
 
     fun restoreBackupFile(context: Context, uri: Uri) = viewModelScope.launch {
