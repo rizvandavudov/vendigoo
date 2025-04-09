@@ -27,7 +27,7 @@ fun LockScreen(
     sharedPreferences: SharedPreferences
 ) {
     val context = LocalContext.current
-    val correctCode = "12345"
+    val correctCode = "masterkey"
     var inputCode by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     var showDeveloperInfo by remember { mutableStateOf(false) }
