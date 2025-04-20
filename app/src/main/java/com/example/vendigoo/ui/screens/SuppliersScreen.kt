@@ -1,7 +1,6 @@
 package com.example.vendigoo.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +19,6 @@ import com.example.vendigoo.data.entities.Supplier
 import com.example.vendigoo.ui.components.DeleteDialog
 import com.example.vendigoo.viewmodel.WholesaleViewModel
 
-// ui/screens/SuppliersScreen.kt
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SuppliersScreen(
@@ -46,9 +44,9 @@ fun SuppliersScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddDialog = true },
-                modifier = Modifier.padding(bottom = 30.dp) // 30 dp yuxarı qaldırır
-
+            FloatingActionButton(
+                onClick = { showAddDialog = true },
+                modifier = Modifier.padding(bottom = 30.dp)
             ) {
                 Icon(Icons.Default.Add, "Yeni təchizatçı")
             }
@@ -56,15 +54,25 @@ fun SuppliersScreen(
     ) { padding ->
         LazyColumn(modifier = Modifier.padding(padding)) {
             items(suppliers) { supplier ->
+                // Balans məlumatlarını yığ
+                val initialBalances by viewModel.getInitialBalances(supplier.id).collectAsState(initial = emptyList())
+                val givenGoods by viewModel.getTransactions(supplier.id, "GIVEN_GOODS").collectAsState(initial = emptyList())
+                val takenMoney by viewModel.getTransactions(supplier.id, "TAKEN_MONEY").collectAsState(initial = emptyList())
+
+                val totalInitial = initialBalances.sumOf { it.amount }
+                val totalGiven = givenGoods.sumOf { it.amount }
+                val totalTaken = takenMoney.sumOf { it.amount }
+                val result = totalInitial + totalGiven - totalTaken
+
                 SupplierItem(
                     supplier = supplier,
+                    qaliq = result,
                     onClick = { navController.navigate("finance/${supplier.id}") },
                     onLongClick = { supplierToDelete = supplier }
                 )
             }
         }
 
-        // Əlavə et dialogu
         if (showAddDialog) {
             AlertDialog(
                 onDismissRequest = { showAddDialog = false },
@@ -104,7 +112,6 @@ fun SuppliersScreen(
             )
         }
 
-        // Silmə dialogu
         supplierToDelete?.let { supplier ->
             DeleteDialog(
                 title = "Təchizatçını Sil",
@@ -123,6 +130,7 @@ fun SuppliersScreen(
 @Composable
 fun SupplierItem(
     supplier: Supplier,
+    qaliq: Double,
     onClick: () -> Unit,
     onLongClick: () -> Unit
 ) {
@@ -130,7 +138,6 @@ fun SupplierItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable(onClick = onClick)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
@@ -142,7 +149,7 @@ fun SupplierItem(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = supplier.name,
+                text = "${supplier.name}   Aktiv Borc   -   ${qaliq} AZN",
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(modifier = Modifier.height(4.dp))
