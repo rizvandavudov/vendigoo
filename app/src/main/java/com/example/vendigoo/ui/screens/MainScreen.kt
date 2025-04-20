@@ -6,6 +6,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,6 +26,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -33,6 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.vendigoo.data.entities.District
@@ -49,6 +53,18 @@ fun MainScreen(
     var showAddDialog by remember { mutableStateOf(false) }
     var newDistrictName by remember { mutableStateOf("") }
     var districtToDelete by remember { mutableStateOf<District?>(null) }
+
+    // 🔍 Axtarış üçün query
+    var searchQuery by remember { mutableStateOf("") }
+
+// ✂️ Rayonları filtr et (yalnız baş hərfə görə)
+    val filteredDistricts = if (searchQuery.isBlank()) {
+        districts
+    } else {
+        districts.filter {
+            it.name.startsWith(searchQuery, ignoreCase = true)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -70,9 +86,8 @@ fun MainScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddDialog = true },
-                modifier = Modifier.padding(bottom = 30.dp) // 30 dp yuxarı qaldırır
+                modifier = Modifier.padding(bottom = 30.dp)
             ) {
-
                 Icon(Icons.Default.Add, contentDescription = "Yeni rayon")
             }
         }
@@ -83,9 +98,30 @@ fun MainScreen(
                 .fillMaxSize()
         ) {
 
+            // 🔍 Filter TextField
+            TextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = { Text("Axtar...") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 10.dp)
+                    .height(52.dp),
+                singleLine = true,
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color(0xFFFAF3E0),
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                ),
+                shape = MaterialTheme.shapes.small
+            )
+
+
             // Rayonlar siyahısı
             LazyColumn(modifier = Modifier.weight(1f)) {
-                items(districts) { district ->
+                items(filteredDistricts) { district ->
                     DistrictItem(
                         district = district,
                         onClick = { navController.navigate("suppliers/${district.id}") },
