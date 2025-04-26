@@ -10,15 +10,18 @@ import com.example.vendigoo.data.entities.Transaction
 import com.example.vendigoo.data.entities.dao.WholesaleDao
 import com.example.vendigoo.model.BackupData
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.Flow
 import java.io.File
 
-// repository/WholesaleRepository.kt
 class WholesaleRepository(private val dao: WholesaleDao) {
 
     // Rayonlar
     fun getAllDistricts() = dao.getAllDistricts()
     suspend fun addDistrict(name: String) = dao.insertDistrict(District(name = name))
     suspend fun deleteDistrict(district: District) = dao.deleteDistrict(district)
+
+    fun getAllSuppliersFlow(): Flow<List<Supplier>> = dao.getAllSuppliersFlow()
+    fun getAllInitialBalancesFlow(): Flow<List<InitialBalance>> = dao.getAllInitialBalancesFlow()
 
     // Təchizatçılar
     fun getSuppliers(districtId: Int) = dao.getSuppliersByDistrict(districtId)
@@ -52,21 +55,16 @@ class WholesaleRepository(private val dao: WholesaleDao) {
     fun createBackupFileInDownloads(context: Context, data: BackupData): File {
         val json = Gson().toJson(data)
 
-        // 1. Faylı daxili direktoriyada yarat
         val internalFile = File(context.filesDir, "backup_vendigoo.txt")
         internalFile.writeText(json)
 
-        // 2. Yükləmələr (Downloads) qovluğuna kopyala
         val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val targetFile = File(downloadsDir, "backup_vendigoo.txt")
 
         try {
-            // Əgər əvvəldən varsa, sil
             if (targetFile.exists()) {
                 targetFile.delete()
             }
-
-            // Faylı kopyala
             internalFile.copyTo(targetFile, overwrite = true)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -74,10 +72,6 @@ class WholesaleRepository(private val dao: WholesaleDao) {
 
         return targetFile
     }
-
-
-
-
 
     // Fayldan backup-ı oxu
     fun parseBackupFile(context: Context, uri: Uri): BackupData? {
@@ -94,7 +88,6 @@ class WholesaleRepository(private val dao: WholesaleDao) {
         }
     }
 
-
     // Backup məlumatlarını database-ə bərpa et
     suspend fun restoreToDatabase(data: BackupData) {
         dao.deleteAllTransactions()
@@ -106,5 +99,10 @@ class WholesaleRepository(private val dao: WholesaleDao) {
         dao.insertAllSuppliers(data.suppliers)
         dao.insertAllTransactions(data.transactions)
         dao.insertAllInitialBalances(data.initialBalances)
+    }
+
+    // ✅ Yeni əlavə etdiyin funksiya
+    suspend fun getTransactionsNow(supplierId: Int, type: String): List<Transaction> {
+        return dao.getTransactionsNow(supplierId, type)
     }
 }

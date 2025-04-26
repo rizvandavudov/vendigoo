@@ -137,7 +137,7 @@ fun FinanceScreen(
                     Text("Götürülən pul: $totalTaken AZN")
                     Divider(modifier = Modifier.padding(vertical = 8.dp))
                     Text(
-                        text = "Qalıq: $result AZN",
+                        text = "Qalıq: ${"%.2f".format(result)} AZN",
                         style = MaterialTheme.typography.headlineSmall
                     )
                 }

@@ -3,38 +3,15 @@ package com.example.vendigoo.ui.screens
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -42,6 +19,9 @@ import androidx.navigation.NavController
 import com.example.vendigoo.data.entities.District
 import com.example.vendigoo.ui.components.DeleteDialog
 import com.example.vendigoo.viewmodel.WholesaleViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,14 +30,38 @@ fun MainScreen(
     viewModel: WholesaleViewModel
 ) {
     val districts by viewModel.districts.collectAsState(initial = emptyList())
+    val suppliers by viewModel.allSuppliers.collectAsState(initial = emptyList())
+
     var showAddDialog by remember { mutableStateOf(false) }
     var newDistrictName by remember { mutableStateOf("") }
     var districtToDelete by remember { mutableStateOf<District?>(null) }
-
-    // 🔍 Axtarış üçün query
     var searchQuery by remember { mutableStateOf("") }
 
-// ✂️ Rayonları filtr et (yalnız baş hərfə görə)
+    val coroutineScope = rememberCoroutineScope()
+    var districtResults by remember { mutableStateOf<Map<Int, Double>>(emptyMap()) }
+    var totalOverallBalance by remember { mutableStateOf(0.0) }
+
+    LaunchedEffect(districts, suppliers) {
+        coroutineScope.launch(Dispatchers.IO) {
+            val resultMap = mutableMapOf<Int, Double>()
+            var total = 0.0
+            for (district in districts) {
+                val suppliersInDistrict = suppliers.filter { it.districtId == district.id }
+                var districtTotal = 0.0
+                for (supplier in suppliersInDistrict) {
+                    val initial = viewModel.getInitialBalances(supplier.id).first().sumOf { it.amount }
+                    val given = viewModel.getTransactions(supplier.id, "GIVEN_GOODS").first().sumOf { it.amount }
+                    val taken = viewModel.getTransactions(supplier.id, "TAKEN_MONEY").first().sumOf { it.amount }
+                    districtTotal += initial + given - taken
+                }
+                resultMap[district.id] = districtTotal
+                total += districtTotal
+            }
+            districtResults = resultMap
+            totalOverallBalance = total
+        }
+    }
+
     val filteredDistricts = if (searchQuery.isBlank()) {
         districts
     } else {
@@ -72,7 +76,7 @@ fun MainScreen(
                 title = { Text("Rayonlar") },
                 actions = {
                     TextButton(onClick = { navController.navigate("support") }) {
-                        Text("📞 Dəstək")
+                        Text("\uD83D\uDCDE Dəstək")
                     }
                     TextButton(onClick = { navController.navigate("about") }) {
                         Text("ℹ️ Haqqında")
@@ -86,7 +90,7 @@ fun MainScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddDialog = true },
-                modifier = Modifier.padding(bottom = 30.dp)
+                modifier = Modifier.padding(bottom = 65.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Yeni rayon")
             }
@@ -97,8 +101,6 @@ fun MainScreen(
                 .padding(padding)
                 .fillMaxSize()
         ) {
-
-            // 🔍 Filter TextField
             TextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
@@ -118,20 +120,47 @@ fun MainScreen(
                 shape = MaterialTheme.shapes.small
             )
 
-
-            // Rayonlar siyahısı
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(filteredDistricts) { district ->
+                    val suppliersInDistrict = suppliers.filter { it.districtId == district.id }
+                    val totalSuppliers = suppliersInDistrict.size
+                    val totalBalance = districtResults[district.id] ?: 0.0
+
                     DistrictItem(
                         district = district,
+                        totalSuppliers = totalSuppliers,
+                        totalBalance = totalBalance,
                         onClick = { navController.navigate("suppliers/${district.id}") },
                         onLongClick = { districtToDelete = district }
                     )
                 }
             }
+
+            Surface(
+                color = Color(0xFFFAF3E0),
+                tonalElevation = 4.dp,
+                shadowElevation = 4.dp,
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 15.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Ümumi Qalıq:",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Text(
+                        text = "${"%.2f".format(totalOverallBalance)} AZN",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+            }
         }
 
-        // Əlavə et dialogu
         if (showAddDialog) {
             AlertDialog(
                 onDismissRequest = { showAddDialog = false },
@@ -160,7 +189,6 @@ fun MainScreen(
             )
         }
 
-        // Silmə dialogu
         districtToDelete?.let { district ->
             DeleteDialog(
                 title = "Rayonu Sil",
@@ -179,6 +207,8 @@ fun MainScreen(
 @Composable
 fun DistrictItem(
     district: District,
+    totalSuppliers: Int = 0,
+    totalBalance: Double = 0.0,
     onClick: () -> Unit,
     onLongClick: () -> Unit
 ) {
@@ -196,10 +226,15 @@ fun DistrictItem(
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
     ) {
-        Text(
-            text = district.name,
-            modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.titleMedium
-        )
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = district.name,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = "Şəxs sayı: $totalSuppliers  |  Qalıq: ${"%.2f".format(totalBalance)} AZN",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }

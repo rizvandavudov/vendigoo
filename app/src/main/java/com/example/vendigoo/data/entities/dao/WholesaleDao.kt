@@ -10,7 +10,6 @@ import com.example.vendigoo.data.entities.Supplier
 import com.example.vendigoo.data.entities.Transaction
 import kotlinx.coroutines.flow.Flow
 
-// data/dao/WholesaleDao.kt
 @Dao
 interface WholesaleDao {
     // Rayonlar üçün
@@ -44,7 +43,14 @@ interface WholesaleDao {
     suspend fun deleteInitialBalance(balance: InitialBalance)
 
     @Query("SELECT * FROM initial_balances")
-    suspend fun getAllInitialBalancesList(): List<InitialBalance> // 🔥 bunu əlavə et
+    suspend fun getAllInitialBalancesList(): List<InitialBalance>
+
+    // ✅ Yeni əlavə olunmuş Flow metodlar (real-time izləmə üçün)
+    @Query("SELECT * FROM suppliers")
+    fun getAllSuppliersFlow(): Flow<List<Supplier>>
+
+    @Query("SELECT * FROM initial_balances")
+    fun getAllInitialBalancesFlow(): Flow<List<InitialBalance>>
 
     // Əməliyyatlar üçün
     @Insert
@@ -90,5 +96,7 @@ interface WholesaleDao {
     @Insert
     suspend fun insertAllInitialBalances(balances: List<InitialBalance>)
 
-
+    // ✅ Sən dediyin yeni əlavə:
+    @Query("SELECT * FROM transactions WHERE supplierId = :supplierId AND type = :type")
+    suspend fun getTransactionsNow(supplierId: Int, type: String): List<Transaction>
 }

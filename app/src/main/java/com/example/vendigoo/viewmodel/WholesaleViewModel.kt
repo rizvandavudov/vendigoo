@@ -55,6 +55,15 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
         repository.deleteTransaction(transaction)
     }
 
+    // Rayon ekranı üçün lazımlı metodlar (Real-time)
+    val allSuppliers = repository.getAllSuppliersFlow().flowOn(Dispatchers.IO)
+    val allBalances = repository.getAllInitialBalancesFlow().flowOn(Dispatchers.IO)
+
+    // Rayonların borc hesablaması üçün sync metod
+    suspend fun getTransactionsNow(supplierId: Int, type: String): List<Transaction> {
+        return repository.getTransactionsNow(supplierId, type)
+    }
+
     fun backupDataToDownloads(context: Context) = viewModelScope.launch {
         try {
             val data = repository.getBackupData()
@@ -62,7 +71,6 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
 
             Toast.makeText(context, "Yedəkləndi: ${file.absolutePath}", Toast.LENGTH_LONG).show()
 
-            // 👉 FileProvider ilə təhlükəsiz aç
             val uri = androidx.core.content.FileProvider.getUriForFile(
                 context,
                 "${context.packageName}.provider",
@@ -82,8 +90,6 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-
-
     fun restoreBackupFile(context: Context, uri: Uri) = viewModelScope.launch {
         val backupData = repository.parseBackupFile(context, uri)
         if (backupData != null) {
@@ -93,5 +99,4 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
             Toast.makeText(context, "Fayl uyğun deyil və ya zədəlidir!", Toast.LENGTH_LONG).show()
         }
     }
-
 }

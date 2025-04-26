@@ -58,7 +58,7 @@ fun TakenMoneyScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddDialog = true },
-                modifier = Modifier.padding(bottom = 69.dp) // 30 dp yuxarı qaldırır
+                modifier = Modifier.padding(bottom = 80.dp) // 30 dp yuxarı qaldırır
             ) {
                 Icon(Icons.Default.Add, "Yeni əməliyyat")
             }

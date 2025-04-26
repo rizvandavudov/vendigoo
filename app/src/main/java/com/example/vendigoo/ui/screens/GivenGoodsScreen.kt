@@ -27,15 +27,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.vendigoo.data.entities.Supplier
 import com.example.vendigoo.data.entities.Transaction
 import com.example.vendigoo.ui.components.AmountDialog
 import com.example.vendigoo.ui.components.DeleteDialog
 import com.example.vendigoo.viewmodel.WholesaleViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
+
 fun GivenGoodsScreen(
     navController: NavController,
     viewModel: WholesaleViewModel,
@@ -58,7 +62,7 @@ fun GivenGoodsScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddDialog = true },
-                modifier = Modifier.padding(bottom = 69.dp) // 30 dp yuxarı qaldırır
+                modifier = Modifier.padding(bottom = 80.dp) // 30 dp yuxarı qaldırır
             ) {
                 Icon(Icons.Default.Add, "Yeni əməliyyat")
             }
@@ -122,5 +126,4 @@ fun GivenGoodsScreen(
         }
     }
 }
-
 

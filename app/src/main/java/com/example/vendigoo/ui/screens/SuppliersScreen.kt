@@ -12,12 +12,18 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.vendigoo.data.entities.Supplier
 import com.example.vendigoo.ui.components.DeleteDialog
 import com.example.vendigoo.viewmodel.WholesaleViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +37,29 @@ fun SuppliersScreen(
     var newSupplierName by remember { mutableStateOf("") }
     var newSupplierPhone by remember { mutableStateOf("") }
     var supplierToDelete by remember { mutableStateOf<Supplier?>(null) }
+
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredSuppliers = if (searchQuery.isBlank()) {
+        suppliers
+    } else {
+        suppliers.filter { it.name.startsWith(searchQuery, ignoreCase = true) }
+    }
+
+    val coroutineScope = rememberCoroutineScope()
+    var totalBalance by remember { mutableStateOf(0.0) }
+
+    LaunchedEffect(filteredSuppliers) {
+        coroutineScope.launch(Dispatchers.IO) {
+            var total = 0.0
+            for (supplier in filteredSuppliers) {
+                val initial = viewModel.getInitialBalances(supplier.id).first().sumOf { it.amount }
+                val given = viewModel.getTransactions(supplier.id, "GIVEN_GOODS").first().sumOf { it.amount }
+                val taken = viewModel.getTransactions(supplier.id, "TAKEN_MONEY").first().sumOf { it.amount }
+                total += initial + given - taken
+            }
+            totalBalance = total
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -46,30 +75,85 @@ fun SuppliersScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddDialog = true },
-                modifier = Modifier.padding(bottom = 30.dp)
+                modifier = Modifier.padding(bottom = 65.dp)
             ) {
                 Icon(Icons.Default.Add, "Yeni təchizatçı")
             }
         }
     ) { padding ->
-        LazyColumn(modifier = Modifier.padding(padding)) {
-            items(suppliers) { supplier ->
-                // Balans məlumatlarını yığ
-                val initialBalances by viewModel.getInitialBalances(supplier.id).collectAsState(initial = emptyList())
-                val givenGoods by viewModel.getTransactions(supplier.id, "GIVEN_GOODS").collectAsState(initial = emptyList())
-                val takenMoney by viewModel.getTransactions(supplier.id, "TAKEN_MONEY").collectAsState(initial = emptyList())
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+        ) {
+            TextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = { Text("Axtar...") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 10.dp)
+                    .height(52.dp),
+                singleLine = true,
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color(0xFFFAF3E0),
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                ),
+                shape = MaterialTheme.shapes.small
+            )
 
-                val totalInitial = initialBalances.sumOf { it.amount }
-                val totalGiven = givenGoods.sumOf { it.amount }
-                val totalTaken = takenMoney.sumOf { it.amount }
-                val result = totalInitial + totalGiven - totalTaken
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp, vertical = 0.dp)
+            ) {
+                items(filteredSuppliers) { supplier ->
+                    val initialBalances by viewModel.getInitialBalances(supplier.id)
+                        .collectAsState(initial = emptyList())
+                    val givenGoods by viewModel.getTransactions(supplier.id, "GIVEN_GOODS")
+                        .collectAsState(initial = emptyList())
+                    val takenMoney by viewModel.getTransactions(supplier.id, "TAKEN_MONEY")
+                        .collectAsState(initial = emptyList())
 
-                SupplierItem(
-                    supplier = supplier,
-                    qaliq = result,
-                    onClick = { navController.navigate("finance/${supplier.id}") },
-                    onLongClick = { supplierToDelete = supplier }
-                )
+                    val totalInitial = initialBalances.sumOf { it.amount }
+                    val totalGiven = givenGoods.sumOf { it.amount }
+                    val totalTaken = takenMoney.sumOf { it.amount }
+                    val result = totalInitial + totalGiven - totalTaken
+
+                    SupplierItem(
+                        supplier = supplier,
+                        qaliq = result,
+                        onClick = { navController.navigate("finance/${supplier.id}") },
+                        onLongClick = { supplierToDelete = supplier }
+                    )
+                }
+            }
+            // Cəm bölməsi
+            Surface(
+                color = Color(0xFFFAF3E0),
+                tonalElevation = 4.dp,
+                shadowElevation = 4.dp,
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 15.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Cəmi:",
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    Text(
+                        text = "${"%.2f".format(totalBalance)} AZN",
+                          style = MaterialTheme.typography.titleLarge,
+                    )
+                }
             }
         }
 
@@ -149,7 +233,7 @@ fun SupplierItem(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "${supplier.name}   Aktiv Borc   -   ${qaliq} AZN",
+                text = "${supplier.name}   Aktiv Borc   -   ${"%.2f".format(qaliq)} AZN",
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(modifier = Modifier.height(4.dp))
