@@ -14,11 +14,13 @@ import com.example.vendigoo.data.entities.Transaction
 import com.example.vendigoo.data.entities.database.WholesaleDatabase
 import com.example.vendigoo.repository.WholesaleRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 class WholesaleViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: WholesaleRepository
+    private val context: Context = application.applicationContext
 
     init {
         val dao = WholesaleDatabase.getDatabase(application).wholesaleDao()
@@ -27,39 +29,52 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
 
     // Rayonlar
     val districts = repository.getAllDistricts().flowOn(Dispatchers.IO)
-    fun addDistrict(name: String) = viewModelScope.launch { repository.addDistrict(name) }
-    fun deleteDistrict(district: District) = viewModelScope.launch { repository.deleteDistrict(district) }
+    fun addDistrict(name: String) = viewModelScope.launch {
+        repository.addDistrict(name)
+        backupDataToDownloads(context)
+    }
+    fun deleteDistrict(district: District) = viewModelScope.launch {
+        repository.deleteDistrict(district)
+        backupDataToDownloads(context)
+    }
 
     // Təchizatçılar
     fun getSuppliers(districtId: Int) = repository.getSuppliers(districtId)
     fun addSupplier(districtId: Int, name: String, phone: String) = viewModelScope.launch {
         repository.addSupplier(districtId, name, phone)
+        backupDataToDownloads(context)
     }
-    fun deleteSupplier(supplier: Supplier) = viewModelScope.launch { repository.deleteSupplier(supplier) }
+    fun deleteSupplier(supplier: Supplier) = viewModelScope.launch {
+        repository.deleteSupplier(supplier)
+        backupDataToDownloads(context)
+    }
 
     // İlkin qalıq
     fun getInitialBalances(supplierId: Int) = repository.getInitialBalances(supplierId)
     fun addInitialBalance(supplierId: Int, amount: Double) = viewModelScope.launch {
         repository.addInitialBalance(supplierId, amount)
+        backupDataToDownloads(context)
     }
     fun deleteInitialBalance(balance: InitialBalance) = viewModelScope.launch {
         repository.deleteInitialBalance(balance)
+        backupDataToDownloads(context)
     }
 
     // Əməliyyatlar
     fun getTransactions(supplierId: Int, type: String) = repository.getTransactions(supplierId, type)
     fun addTransaction(supplierId: Int, amount: Double, type: String) = viewModelScope.launch {
         repository.addTransaction(supplierId, amount, type)
+        backupDataToDownloads(context)
     }
     fun deleteTransaction(transaction: Transaction) = viewModelScope.launch {
         repository.deleteTransaction(transaction)
+        backupDataToDownloads(context)
     }
 
     // Rayon ekranı üçün lazımlı metodlar (Real-time)
     val allSuppliers = repository.getAllSuppliersFlow().flowOn(Dispatchers.IO)
     val allBalances = repository.getAllInitialBalancesFlow().flowOn(Dispatchers.IO)
 
-    // Rayonların borc hesablaması üçün sync metod
     suspend fun getTransactionsNow(supplierId: Int, type: String): List<Transaction> {
         return repository.getTransactionsNow(supplierId, type)
     }
@@ -69,7 +84,7 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
             val data = repository.getBackupData()
             val file = repository.createBackupFileInDownloads(context, data)
 
-            Toast.makeText(context, "Yedəkləndi: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Yedəkləndi", Toast.LENGTH_LONG).show()
 
             val uri = androidx.core.content.FileProvider.getUriForFile(
                 context,
@@ -85,7 +100,7 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
             context.startActivity(Intent.createChooser(intent, "Faylı aç"))
 
         } catch (e: Exception) {
-            Toast.makeText(context, "Yedəkləmə və ya açma zamanı xəta baş verdi!", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Etdiyiniz hər Əməliyyat yedəklənir!", Toast.LENGTH_LONG).show()
             e.printStackTrace()
         }
     }
