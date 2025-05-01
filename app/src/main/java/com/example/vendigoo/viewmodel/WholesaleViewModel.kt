@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.view.Gravity
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,7 +15,6 @@ import com.example.vendigoo.data.entities.Transaction
 import com.example.vendigoo.data.entities.database.WholesaleDatabase
 import com.example.vendigoo.repository.WholesaleRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
@@ -84,7 +84,9 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
             val data = repository.getBackupData()
             val file = repository.createBackupFileInDownloads(context, data)
 
-            Toast.makeText(context, "Yedəkləndi", Toast.LENGTH_LONG).show()
+            val toast = Toast.makeText(context, "✅", Toast.LENGTH_SHORT)
+            toast.setGravity(Gravity.TOP or Gravity.END, 50, 100)
+            toast.show()
 
             val uri = androidx.core.content.FileProvider.getUriForFile(
                 context,
@@ -100,7 +102,7 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
             context.startActivity(Intent.createChooser(intent, "Faylı aç"))
 
         } catch (e: Exception) {
-            Toast.makeText(context, "Etdiyiniz hər Əməliyyat yedəklənir!", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "✅ ", Toast.LENGTH_LONG).show()
             e.printStackTrace()
         }
     }
