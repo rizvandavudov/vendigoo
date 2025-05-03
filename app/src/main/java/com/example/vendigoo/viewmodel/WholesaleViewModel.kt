@@ -2,7 +2,6 @@ package com.example.vendigoo.viewmodel
 
 import android.app.Application
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.view.Gravity
 import android.widget.Toast
@@ -33,6 +32,7 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
         repository.addDistrict(name)
         backupDataToDownloads(context)
     }
+
     fun deleteDistrict(district: District) = viewModelScope.launch {
         repository.deleteDistrict(district)
         backupDataToDownloads(context)
@@ -44,6 +44,7 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
         repository.addSupplier(districtId, name, phone)
         backupDataToDownloads(context)
     }
+
     fun deleteSupplier(supplier: Supplier) = viewModelScope.launch {
         repository.deleteSupplier(supplier)
         backupDataToDownloads(context)
@@ -55,17 +56,21 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
         repository.addInitialBalance(supplierId, amount)
         backupDataToDownloads(context)
     }
+
     fun deleteInitialBalance(balance: InitialBalance) = viewModelScope.launch {
         repository.deleteInitialBalance(balance)
         backupDataToDownloads(context)
     }
 
     // Əməliyyatlar
-    fun getTransactions(supplierId: Int, type: String) = repository.getTransactions(supplierId, type)
+    fun getTransactions(supplierId: Int, type: String) =
+        repository.getTransactions(supplierId, type)
+
     fun addTransaction(supplierId: Int, amount: Double, type: String) = viewModelScope.launch {
         repository.addTransaction(supplierId, amount, type)
         backupDataToDownloads(context)
     }
+
     fun deleteTransaction(transaction: Transaction) = viewModelScope.launch {
         repository.deleteTransaction(transaction)
         backupDataToDownloads(context)
@@ -73,36 +78,17 @@ class WholesaleViewModel(application: Application) : AndroidViewModel(applicatio
 
     // Rayon ekranı üçün lazımlı metodlar (Real-time)
     val allSuppliers = repository.getAllSuppliersFlow().flowOn(Dispatchers.IO)
-    val allBalances = repository.getAllInitialBalancesFlow().flowOn(Dispatchers.IO)
-
-    suspend fun getTransactionsNow(supplierId: Int, type: String): List<Transaction> {
-        return repository.getTransactionsNow(supplierId, type)
-    }
 
     fun backupDataToDownloads(context: Context) = viewModelScope.launch {
         try {
             val data = repository.getBackupData()
-            val file = repository.createBackupFileInDownloads(context, data)
+            repository.createBackupFileInDownloads(context, data)
 
             val toast = Toast.makeText(context, "✅", Toast.LENGTH_SHORT)
             toast.setGravity(Gravity.TOP or Gravity.END, 50, 100)
             toast.show()
 
-            val uri = androidx.core.content.FileProvider.getUriForFile(
-                context,
-                "${context.packageName}.provider",
-                file
-            )
-
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(uri, "text/plain")
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-
-            context.startActivity(Intent.createChooser(intent, "Faylı aç"))
-
         } catch (e: Exception) {
-            Toast.makeText(context, "✅ ", Toast.LENGTH_LONG).show()
             e.printStackTrace()
         }
     }

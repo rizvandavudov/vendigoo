@@ -1,5 +1,6 @@
 package com.example.vendigoo.ui.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
@@ -14,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.vendigoo.data.entities.Supplier
@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 
 
+@SuppressLint("AutoboxingStateCreation")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SuppliersScreen(
@@ -86,6 +87,7 @@ fun SuppliersScreen(
                 .padding(padding)
                 .fillMaxSize()
         ) {
+            val containerColor = Color(0xFFFAF3E0)
             TextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
@@ -96,11 +98,13 @@ fun SuppliersScreen(
                     .padding(top = 10.dp)
                     .height(52.dp),
                 singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color(0xFFFAF3E0),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = containerColor,
+                    unfocusedContainerColor = containerColor,
+                    disabledContainerColor = containerColor,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
+                    disabledIndicatorColor = Color.Transparent,
                 ),
                 shape = MaterialTheme.shapes.small
             )

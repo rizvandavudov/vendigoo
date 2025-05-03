@@ -1,5 +1,6 @@
 package com.example.vendigoo.ui.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -22,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+@SuppressLint("AutoboxingStateCreation")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
@@ -100,6 +102,7 @@ fun MainScreen(
                 .padding(padding)
                 .fillMaxSize()
         ) {
+            val containerColor = Color(0xFFFAF3E0)
             TextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
@@ -110,11 +113,13 @@ fun MainScreen(
                     .padding(top = 10.dp)
                     .height(52.dp),
                 singleLine = true,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color(0xFFFAF3E0),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = containerColor,
+                    unfocusedContainerColor = containerColor,
+                    disabledContainerColor = containerColor,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
+                    disabledIndicatorColor = Color.Transparent,
                 ),
                 shape = MaterialTheme.shapes.small
             )

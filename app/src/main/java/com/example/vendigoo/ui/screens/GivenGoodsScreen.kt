@@ -27,10 +27,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.vendigoo.data.entities.Supplier
 import com.example.vendigoo.data.entities.Transaction
 import com.example.vendigoo.ui.components.AmountDialog
 import com.example.vendigoo.ui.components.DeleteDialog

@@ -39,12 +39,5 @@ abstract class WholesaleDatabase : RoomDatabase() {
         }
     }
 
-    suspend fun clearAllData() {
-        wholesaleDao().apply {
-            deleteAllTransactions()
-            deleteAllSuppliers()
-            deleteAllDistricts()
-            deleteAllInitialBalances()
-        }
-    }
+
 }

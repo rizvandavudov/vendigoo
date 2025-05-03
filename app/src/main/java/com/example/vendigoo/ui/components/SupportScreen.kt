@@ -1,3 +1,4 @@
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.material3.*
@@ -11,6 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
+@SuppressLint("UseKtx")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SupportScreen(navController: NavController) {

@@ -1,5 +1,6 @@
 package com.example.vendigoo.ui.screens
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
@@ -21,6 +22,7 @@ import com.example.vendigoo.R
 import androidx.compose.ui.graphics.Color
 
 
+@SuppressLint("UseKtx")
 @Composable
 fun LockScreen(
     navController: NavController,

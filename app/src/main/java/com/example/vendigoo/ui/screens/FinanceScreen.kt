@@ -1,5 +1,6 @@
 package com.example.vendigoo.ui.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -171,6 +172,7 @@ fun FinanceScreen(
     }
 }
 
+@SuppressLint("SimpleDateFormat")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BalanceItem(

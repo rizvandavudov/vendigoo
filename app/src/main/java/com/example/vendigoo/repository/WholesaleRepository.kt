@@ -21,24 +21,26 @@ class WholesaleRepository(private val dao: WholesaleDao) {
     suspend fun deleteDistrict(district: District) = dao.deleteDistrict(district)
 
     fun getAllSuppliersFlow(): Flow<List<Supplier>> = dao.getAllSuppliersFlow()
-    fun getAllInitialBalancesFlow(): Flow<List<InitialBalance>> = dao.getAllInitialBalancesFlow()
 
     // Təchizatçılar
     fun getSuppliers(districtId: Int) = dao.getSuppliersByDistrict(districtId)
     suspend fun addSupplier(districtId: Int, name: String, phone: String) =
         dao.insertSupplier(Supplier(districtId = districtId, name = name, phone = phone))
+
     suspend fun deleteSupplier(supplier: Supplier) = dao.deleteSupplier(supplier)
 
     // İlkin qalıq
     fun getInitialBalances(supplierId: Int) = dao.getInitialBalances(supplierId)
     suspend fun addInitialBalance(supplierId: Int, amount: Double) =
         dao.insertInitialBalance(InitialBalance(supplierId = supplierId, amount = amount))
+
     suspend fun deleteInitialBalance(balance: InitialBalance) = dao.deleteInitialBalance(balance)
 
     // Əməliyyatlar
     fun getTransactions(supplierId: Int, type: String) = dao.getTransactionsByType(supplierId, type)
     suspend fun addTransaction(supplierId: Int, amount: Double, type: String) =
         dao.insertTransaction(Transaction(supplierId = supplierId, amount = amount, type = type))
+
     suspend fun deleteTransaction(transaction: Transaction) = dao.deleteTransaction(transaction)
 
     // Backup üçün məlumatları çıxar
@@ -58,7 +60,8 @@ class WholesaleRepository(private val dao: WholesaleDao) {
         val internalFile = File(context.filesDir, "backup_vendigoo.txt")
         internalFile.writeText(json)
 
-        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val downloadsDir =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val targetFile = File(downloadsDir, "backup_vendigoo.txt")
 
         try {
@@ -99,10 +102,5 @@ class WholesaleRepository(private val dao: WholesaleDao) {
         dao.insertAllSuppliers(data.suppliers)
         dao.insertAllTransactions(data.transactions)
         dao.insertAllInitialBalances(data.initialBalances)
-    }
-
-    // ✅ Yeni əlavə etdiyin funksiya
-    suspend fun getTransactionsNow(supplierId: Int, type: String): List<Transaction> {
-        return dao.getTransactionsNow(supplierId, type)
     }
 }

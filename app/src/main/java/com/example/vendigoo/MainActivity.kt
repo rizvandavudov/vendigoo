@@ -11,7 +11,6 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
-import com.example.vendigoo.data.entities.database.WholesaleDatabase
 import com.example.vendigoo.navigation.NavGraph
 import com.example.vendigoo.ui.theme.WholesaleTheme
 import com.example.vendigoo.viewmodel.WholesaleViewModel
@@ -23,8 +22,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Proqram başlayanda verilənlər bazasını işə salırıq
-        val database = WholesaleDatabase.getDatabase(this)
+
 
         setContent {
             WholesaleTheme {
