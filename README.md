@@ -32,11 +32,11 @@ com.example.vendigoo/
 📸 Screenshots
 <p align="center"> 
  <img src="app/src/docs/splashscreen.jpeg" width="220"/> 
- <img src="app/docs/mainscreen.jpeg" width="220"/> 
- <img src="app/docs/mainscreen2.jpeg" width="220"/> 
- <img src="app/docs/reportscreen.jpeg" width="220"/> 
- <img src="app/docs/supportscreen.jpeg" width="220"/> 
- <img src="app/docs/aboutsceen.jpeg" width="220"/> 
+ <img src="app/src/docs/mainscreen.jpeg" width="220"/> 
+ <img src="app/src/docs/mainscreen2.jpeg" width="220"/> 
+ <img src="app/src/docs/reportscreen.jpeg" width="220"/> 
+ <img src="app/src/docs/supportscreen.jpeg" width="220"/> 
+ <img src="app/src/docs/boutsceen.jpeg" width="220"/> 
  
 </p>
 
