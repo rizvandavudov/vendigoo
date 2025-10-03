@@ -28,13 +28,15 @@ com.example.vendigoo/
 
 🖼️ Screenshots
 
-Upload your screenshots to a screenshots folder and name them as below:
 
-main_screen.png
-
-suppliers_screen.png
-
-finance_screen.png
+📸 Screenshots
+<p align="center"> 
+ <img src="app/src/docs/screenshots/splash.jpeg" width="220"/> 
+ <img src="app/src/docs/screenshots/main.jpeg" width="220"/> 
+ <img src="app/src/docs/screenshots/report.jpeg" width="220"/> 
+ <img src="app/src/docs/screenshots/backup.jpeg" width="220"/> 
+ 
+</p>
 
 
 
